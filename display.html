@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pasapalabra - Pantalla</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            color: white;
+            overflow: hidden;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 30px 50px;
+            background: rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .participant-info {
+            text-align: center;
+        }
+
+        .participant-name {
+            font-size: 36px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            min-height: 50px;
+        }
+
+        .participant-number {
+            font-size: 24px;
+            opacity: 0.8;
+        }
+
+        .timer-display {
+            font-size: 72px;
+            font-weight: bold;
+            text-align: center;
+            background: linear-gradient(45deg, #fff, #f0f0f0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 20px rgba(255,255,255,0.5);
+            min-width: 200px;
+        }
+
+        .timer-display.warning {
+            background: linear-gradient(45deg, #ff9800, #f57c00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .timer-display.danger {
+            background: linear-gradient(45deg, #f44336, #d32f2f);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 50px;
+        }
+
+        .rosco-container {
+            position: relative;
+            width: 750px;
+            height: 750px;
+        }
+
+        .rosco {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .letter {
+            position: absolute;
+            width: 65px;
+            height: 65px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 28px;
+            transition: all 0.5s;
+            border: 3px solid rgba(255,255,255,0.3);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        .letter.unplayed {
+            background: linear-gradient(135deg, #808080, #999999);
+            color: white;
+        }
+
+        .letter.correct {
+            background: linear-gradient(135deg, #4CAF50, #66BB6A);
+            color: white;
+            box-shadow: 0 0 20px rgba(76, 175, 80, 0.6);
+        }
+
+        .letter.pass {
+            background: linear-gradient(135deg, #FF9800, #FFB74D);
+            color: white;
+            box-shadow: 0 0 20px rgba(255, 152, 0, 0.6);
+        }
+
+        .letter.error {
+            background: linear-gradient(135deg, #f44336, #EF5350);
+            color: white;
+            box-shadow: 0 0 20px rgba(244, 67, 54, 0.6);
+        }
+
+        .letter.current {
+            transform: scale(1.8);
+            z-index: 10;
+            background: linear-gradient(135deg, #2196F3, #42A5F5);
+            color: white;
+            box-shadow: 0 0 30px rgba(33, 150, 243, 0.8);
+            border-color: #fff;
+            animation: glow 2s infinite alternate;
+        }
+
+        @keyframes glow {
+            from {
+                box-shadow: 0 0 30px rgba(33, 150, 243, 0.8);
+            }
+            to {
+                box-shadow: 0 0 40px rgba(33, 150, 243, 1), 0 0 60px rgba(33, 150, 243, 0.6);
+            }
+        }
+
+        .center-image {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 250px;
+            height: 250px;
+            border-radius: 50%;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            border: 5px solid rgba(255,255,255,0.8);
+            overflow: hidden;
+            background: linear-gradient(135deg, #2196F3, #42A5F5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .center-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .game-status {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.6);
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 18px;
+            backdrop-filter: blur(10px);
+        }
+
+        .connection-status {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .connection-status.connected {
+            background: rgba(76, 175, 80, 0.8);
+        }
+
+        .connection-status.disconnected {
+            background: rgba(244, 67, 54, 0.8);
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0.5; }
+        }
+
+        .round-info {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0,0,0,0.6);
+            padding: 15px 25px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .round-number {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .letters-remaining {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 1024px) {
+            .rosco-container {
+                width: 500px;
+                height: 500px;
+            }
+            
+            .letter {
+                width: 50px;
+                height: 50px;
+                font-size: 24px;
+            }
+            
+            .center-logo {
+                width: 160px;
+                height: 160px;
+                font-size: 28px;
+            }
+            
+            .timer-display {
+                font-size: 60px;
+            }
+            
+            .participant-name {
+                font-size: 30px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 20px 30px;
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .rosco-container {
+                width: 400px;
+                height: 400px;
+            }
+            
+            .letter {
+                width: 40px;
+                height: 40px;
+                font-size: 20px;
+            }
+            
+            .center-logo {
+                width: 120px;
+                height: 120px;
+                font-size: 24px;
+            }
+            
+            .timer-display {
+                font-size: 48px;
+            }
+            
+            .participant-name {
+                font-size: 24px;
+            }
+        }
+
+        .loading {
+            text-align: center;
+            font-size: 24px;
+        }
+
+        .loading:after {
+            content: '';
+            animation: loading 1.5s infinite;
+        }
+
+        @keyframes loading {
+            0% { content: '.'; }
+            33% { content: '..'; }
+            66% { content: '...'; }
+            100% { content: '.'; }
+        }
+    </style>
+</head>
+<body>
+    <div class="connection-status" id="connectionStatus">● SINCRONIZADO</div>
+    
+    <div class="round-info">
+        <div class="round-number">RONDA <span id="roundNumber">1</span></div>
+        <div class="letters-remaining">Letras pendientes: <span id="lettersRemaining">27</span></div>
+    </div>
+
+    <div class="header">
+        <div class="participant-info">
+            <div class="participant-name" id="participantName"></div>
+            <div class="participant-number" id="participantNumber">Participante 1</div>
+        </div>
+        
+        <div class="timer-display" id="timerDisplay">60</div>
+    </div>
+
+    <div class="main-content">
+        <div class="rosco-container">
+            <div class="rosco" id="rosco"></div>
+            <div class="center-image" id="centerImage">
+                <span id="noImageText">SIN FOTO</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="game-status" id="gameStatus">Esperando inicio del juego</div>
+
+    <script>
+        let gameState = {};
+        let lastUpdateTime = 0;
+        const alphabet = 'ABCDEFGHIJKLMNÑOPQRSTUVWXYZ'.split('');
+
+        function initializeDisplay() {
+            createRosco();
+            startSyncLoop();
+        }
+
+        function createRosco() {
+            const rosco = document.getElementById('rosco');
+            rosco.innerHTML = '';
+            
+            alphabet.forEach((letter, index) => {
+                const letterDiv = document.createElement('div');
+                letterDiv.className = 'letter unplayed';
+                letterDiv.textContent = letter;
+                letterDiv.id = `letter-${letter}`;
+                
+                const angle = (index * 360 / 27) - 90;
+                const radius = 290;
+                const x = Math.cos(angle * Math.PI / 180) * radius + 345;
+                const y = Math.sin(angle * Math.PI / 180) * radius + 345;
+                
+                letterDiv.style.left = x + 'px';
+                letterDiv.style.top = y + 'px';
+                
+                rosco.appendChild(letterDiv);
+            });
+        }
+
+        function updateDisplay() {
+            if (!gameState.currentParticipant) return;
+
+            document.getElementById('participantNumber').textContent = `Participante ${gameState.currentParticipant}`;
+            
+            if (gameState.gameData && gameState.gameData[gameState.currentParticipant]) {
+                const participantData = gameState.gameData[gameState.currentParticipant];
+                document.getElementById('participantName').textContent = 
+                    participantData.participante || `Participante ${gameState.currentParticipant}`;
+                
+                // Actualizar imagen del participante
+                updateParticipantImage(participantData.imagen);
+            }
+            
+            updateRoscoDisplay();
+            updateTimerDisplay();
+            updateGameInfo();
+        }
+
+        function updateParticipantImage(imagePath) {
+            const centerImage = document.getElementById('centerImage');
+            const noImageText = document.getElementById('noImageText');
+            
+            if (imagePath) {
+                // Verificar si ya existe una imagen
+                let img = centerImage.querySelector('img');
+                if (!img) {
+                    img = document.createElement('img');
+                    centerImage.appendChild(img);
+                }
+                
+                img.src = imagePath;
+                img.style.display = 'block';
+                noImageText.style.display = 'none';
+                
+                // Manejar error de carga de imagen
+                img.onerror = function() {
+                    img.style.display = 'none';
+                    noImageText.style.display = 'block';
+                    noImageText.textContent = 'IMAGEN NO ENCONTRADA';
+                };
+            } else {
+                // No hay imagen, mostrar texto por defecto
+                const img = centerImage.querySelector('img');
+                if (img) {
+                    img.style.display = 'none';
+                }
+                noImageText.style.display = 'block';
+                noImageText.textContent = 'SIN FOTO';
+            }
+        }
+
+        function updateRoscoDisplay() {
+            if (!gameState.letterStates || !gameState.currentLetter) return;
+
+            alphabet.forEach(letter => {
+                const letterDiv = document.getElementById(`letter-${letter}`);
+                if (!letterDiv) return;
+
+                const key = `${gameState.currentParticipant}-${letter}`;
+                const state = gameState.letterStates[key] || 'unplayed';
+                
+                letterDiv.className = `letter ${state}`;
+                if (letter === gameState.currentLetter) {
+                    letterDiv.classList.add('current');
+                }
+            });
+        }
+
+        function updateTimerDisplay() {
+            const display = document.getElementById('timerDisplay');
+            
+            // Obtener timer del participante actual
+            let milliseconds = 60000; // Default
+            if (gameState.participantTimers && gameState.currentParticipant) {
+                milliseconds = gameState.participantTimers[gameState.currentParticipant] || gameState.defaultTimerMilliseconds || 60000;
+            } else if (gameState.timerMilliseconds) {
+                // Compatibilidad con versión anterior
+                milliseconds = gameState.timerMilliseconds;
+            } else if (gameState.timerSeconds) {
+                milliseconds = gameState.timerSeconds * 1000;
+            }
+            
+            const seconds = Math.floor(milliseconds / 1000);
+            
+            // Solo mostrar segundos en la pantalla display
+            display.textContent = seconds;
+            
+            display.className = 'timer-display';
+            if (seconds <= 10) {
+                display.classList.add('danger');
+            } else if (seconds <= 30) {
+                display.classList.add('warning');
+            }
+        }
+
+        function updateGameInfo() {
+            if (!gameState.letterStates || !gameState.currentParticipant) return;
+
+            let lettersRemaining = 0;
+            let correctCount = 0;
+            let errorCount = 0;
+            let passCount = 0;
+
+            alphabet.forEach(letter => {
+                const key = `${gameState.currentParticipant}-${letter}`;
+                const state = gameState.letterStates[key];
+                
+                if (!state || state === 'unplayed' || state === 'pass') {
+                    lettersRemaining++;
+                }
+                
+                if (state === 'correct') correctCount++;
+                else if (state === 'error') errorCount++;
+                else if (state === 'pass') passCount++;
+            });
+
+            document.getElementById('lettersRemaining').textContent = lettersRemaining;
+            
+            let status = 'En juego';
+            if (gameState.isTimerRunning) {
+                status = 'Timer activo';
+            } else {
+                // Verificar si el timer del participante actual es 0
+                let currentTimer = 60000;
+                if (gameState.participantTimers && gameState.currentParticipant) {
+                    currentTimer = gameState.participantTimers[gameState.currentParticipant] || gameState.defaultTimerMilliseconds || 60000;
+                } else if (gameState.timerMilliseconds) {
+                    currentTimer = gameState.timerMilliseconds;
+                } else if (gameState.timerSeconds) {
+                    currentTimer = gameState.timerSeconds * 1000;
+                }
+                
+                if (Math.floor(currentTimer / 1000) === 0) {
+                    status = 'Tiempo agotado';
+                } else {
+                    status = 'Timer pausado';
+                }
+            }
+            
+            document.getElementById('gameStatus').textContent = 
+                `${status} • Correctas: ${correctCount} • Errores: ${errorCount} • Pasapalabra: ${passCount}`;
+        }
+
+        function syncWithControl() {
+            try {
+                const saved = localStorage.getItem('pasapalabraState');
+                if (saved) {
+                    const newState = JSON.parse(saved);
+                    const currentTime = Date.now();
+                    
+                    if (JSON.stringify(newState) !== JSON.stringify(gameState)) {
+                        gameState = newState;
+                        updateDisplay();
+                        lastUpdateTime = currentTime;
+                        updateConnectionStatus(true);
+                    } else if (currentTime - lastUpdateTime > 5000) {
+                        updateConnectionStatus(false);
+                    }
+                } else {
+                    updateConnectionStatus(false);
+                }
+            } catch (error) {
+                console.error('Error syncing with control:', error);
+                updateConnectionStatus(false);
+            }
+        }
+
+        function updateConnectionStatus(connected) {
+            const status = document.getElementById('connectionStatus');
+            if (connected) {
+                status.textContent = '● SINCRONIZADO';
+                status.className = 'connection-status connected';
+            } else {
+                status.textContent = '● DESCONECTADO';
+                status.className = 'connection-status disconnected';
+            }
+        }
+
+        function startSyncLoop() {
+            setInterval(syncWithControl, 500);
+            
+            setTimeout(() => {
+                if (Object.keys(gameState).length === 0) {
+                    document.getElementById('gameStatus').innerHTML = 
+                        '<div class="loading">Esperando conexión con el control</div>';
+                }
+            }, 3000);
+        }
+
+        function calculateRoundNumber() {
+            if (!gameState.letterStates || !gameState.currentParticipant) return 1;
+            
+            let maxRound = 1;
+            alphabet.forEach(letter => {
+                const key = `${gameState.currentParticipant}-${letter}`;
+                const state = gameState.letterStates[key];
+                if (state === 'correct' || state === 'error') {
+                    maxRound = Math.max(maxRound, 2);
+                }
+            });
+            
+            return maxRound;
+        }
+
+        window.addEventListener('focus', () => {
+            syncWithControl();
+        });
+
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'pasapalabraState') {
+                syncWithControl();
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'F11') {
+                e.preventDefault();
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen();
+                } else {
+                    document.exitFullscreen();
+                }
+            }
+        });
+
+        initializeDisplay();
+    </script>
+</body>
+</html>

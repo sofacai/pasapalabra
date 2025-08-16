@@ -1,0 +1,1293 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pasapalabra - Control</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .participant-selector {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .participant-selector button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            transition: all 0.3s;
+        }
+
+        .participant-selector button:hover {
+            background: #45a049;
+            transform: scale(1.1);
+        }
+
+        .participant-info {
+            background: #f8f9fa;
+            padding: 15px 25px;
+            border-radius: 10px;
+            text-align: center;
+            min-width: 200px;
+        }
+
+        .participant-info h3 {
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .participant-info span {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .timer-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .timer-display {
+            font-size: 32px;
+            font-weight: bold;
+            color: #333;
+            background: #f0f0f0;
+            padding: 15px 25px;
+            border-radius: 10px;
+            min-width: 100px;
+            text-align: center;
+        }
+
+        .timer-display.warning {
+            background: #ffeb3b;
+            color: #f57c00;
+        }
+
+        .timer-display.danger {
+            background: #f44336;
+            color: white;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .question-area {
+            background: #e3f2fd;
+            border: 3px solid #2196f3;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .current-letter {
+            font-size: 48px;
+            font-weight: bold;
+            color: #1976d2;
+            margin-bottom: 20px;
+        }
+
+        .question-text {
+            font-size: 24px;
+            color: #333;
+            line-height: 1.4;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .answer-section {
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .answer-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .answer-toggle {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .answer-toggle:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+
+        .answer-toggle.hidden {
+            background: #6c757d;
+        }
+
+        .answer-toggle.hidden:hover {
+            background: #5a6268;
+        }
+
+        .answer-text {
+            font-size: 20px;
+            font-weight: bold;
+            color: #155724;
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 8px;
+            padding: 15px;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .answer-text.hidden {
+            background: #e9ecef;
+            color: #6c757d;
+            border-color: #dee2e6;
+        }
+
+        .controls-section {
+            display: flex;
+            justify-content: space-between;
+            gap: 30px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 20px;
+            flex: 1;
+            justify-content: center;
+        }
+
+        .action-buttons button {
+            flex: 1;
+            max-width: 200px;
+            padding: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            line-height: 1.2;
+        }
+        
+        .action-buttons button small {
+            display: block;
+            font-size: 12px;
+            font-weight: normal;
+            margin-top: 5px;
+            opacity: 0.8;
+            text-transform: none;
+        }
+
+        .btn-correct {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .btn-correct:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
+
+        .btn-pass {
+            background: #FF9800;
+            color: white;
+        }
+
+        .btn-pass:hover {
+            background: #f57c00;
+            transform: translateY(-2px);
+        }
+
+        .btn-error {
+            background: #f44336;
+            color: white;
+        }
+
+        .btn-error:hover {
+            background: #da190b;
+            transform: translateY(-2px);
+        }
+
+        .timer-buttons {
+            display: flex;
+            gap: 10px;
+            flex-direction: column;
+        }
+
+        .timer-buttons button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            line-height: 1.2;
+        }
+        
+        .timer-buttons button small {
+            display: block;
+            font-size: 10px;
+            font-weight: normal;
+            margin-top: 3px;
+            opacity: 0.8;
+        }
+
+        .btn-pause {
+            background: #FF5722;
+            color: white;
+        }
+
+        .btn-resume {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .btn-config {
+            background: #607D8B;
+            color: white;
+        }
+
+        .btn-reset {
+            background: #9C27B0;
+            color: white;
+            padding: 15px 25px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            margin-top: 10px;
+        }
+
+        .btn-reset:hover {
+            background: #7B1FA2;
+            transform: translateY(-2px);
+        }
+        
+        .btn-reset[style*="background: #FF5722"]:hover {
+            background: #E64A19 !important;
+        }
+
+        .rosco-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .rosco {
+            width: 550px;
+            height: 550px;
+            position: relative;
+            margin: 0 auto;
+        }
+
+        .letter {
+            position: absolute;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid #333;
+        }
+
+        .letter.unplayed {
+            background: #808080;
+            color: white;
+        }
+
+        .letter.correct {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .letter.pass {
+            background: #FF9800;
+            color: white;
+        }
+
+        .letter.error {
+            background: #f44336;
+            color: white;
+        }
+
+        .letter.current {
+            transform: scale(1.5);
+            z-index: 10;
+            box-shadow: 0 0 20px rgba(33, 150, 243, 0.8);
+            border-color: #2196f3;
+        }
+
+        .file-upload {
+            background: #f8f9fa;
+            border: 2px dashed #ddd;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .file-upload input[type="file"] {
+            margin: 10px 0;
+        }
+
+        .config-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+
+        .config-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .config-content input {
+            padding: 10px;
+            font-size: 18px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            margin: 10px;
+            width: 100px;
+        }
+
+        .config-content button {
+            padding: 10px 20px;
+            margin: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .game-status {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .keyboard-shortcuts {
+            background: #e8f5e8;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 14px;
+            color: #2e7d32;
+        }
+        
+        .keyboard-shortcuts strong {
+            color: #1b5e20;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .controls-section {
+                flex-direction: column;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .rosco {
+                width: 300px;
+                height: 300px;
+            }
+            
+            .letter {
+                width: 30px;
+                height: 30px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="participant-selector">
+                <button id="prevParticipant">←</button>
+                <div class="participant-info">
+                    <h3 id="participantName">Seleccionar Participante</h3>
+                    <span id="participantNumber">Participante 1</span>
+                </div>
+                <button id="nextParticipant">→</button>
+            </div>
+            
+            <div class="timer-controls">
+                <div class="timer-display" id="timerDisplay">60</div>
+                <div class="timer-buttons">
+                    <button class="btn-pause" id="pauseBtn">PAUSAR<br><small>(Enter)</small></button>
+                    <button class="btn-resume" id="resumeBtn">REANUDAR<br><small>(Enter)</small></button>
+                    <button class="btn-config" id="configBtn">CONFIG</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="keyboard-shortcuts">
+            <strong>Atajos de Teclado:</strong> 1=Correcto | 2=Pasapalabra | 3=Error | Enter=Pausar/Reanudar
+        </div>
+        
+        <div class="game-status">
+            <strong>Estado del Juego:</strong> <span id="gameStatus">Esperando inicio</span>
+        </div>
+
+        <div class="question-area">
+            <div class="current-letter" id="currentLetterDisplay">A</div>
+            <div class="question-text" id="questionText">Carga un archivo JSON para comenzar</div>
+            <div class="answer-section">
+                <div class="answer-controls">
+                    <h4>Pregunta y Respuesta:</h4>
+                    <button class="answer-toggle" id="answerToggle">🔍 MOSTRAR PREGUNTA Y RESPUESTA</button>
+                </div>
+                <div class="answer-text hidden" id="answerText">***************</div>
+            </div>
+        </div>
+
+        <div class="controls-section">
+            <div class="action-buttons">
+                <button class="btn-correct" id="correctBtn">✓ CORRECTO<br><small>(Tecla 1)</small></button>
+                <button class="btn-pass" id="passBtn">→ PASAPALABRA<br><small>(Tecla 2)</small></button>
+                <button class="btn-error" id="errorBtn">✗ ERROR<br><small>(Tecla 3)</small></button>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-bottom: 30px; display: flex; gap: 20px; justify-content: center;">
+            <button class="btn-reset" id="resetBtn">🔄 LIMPIAR ROSCO</button>
+            <button class="btn-reset" id="clearLetterBtn" style="background: #FF5722;">🧽 LIMPIAR LETRA ACTUAL</button>
+        </div>
+
+        <div class="rosco-container">
+            <div class="rosco" id="rosco"></div>
+        </div>
+
+        <div class="file-upload">
+            <h3>Cargar Preguntas</h3>
+            <input type="file" id="fileInput" accept=".json" multiple>
+            <div>Sube uno o más archivos JSON con las preguntas del juego</div>
+            <div id="loadedFiles" style="margin-top: 10px; font-size: 14px; color: #666;"></div>
+        </div>
+    </div>
+
+    <div class="config-modal" id="configModal">
+        <div class="config-content">
+            <h3>Configurar Timer</h3>
+            <label>Tiempo (segundos):</label>
+            <input type="number" id="timeInput" value="60" min="10" max="300">
+            <br>
+            <button onclick="saveTimeConfig()" style="background: #4CAF50; color: white;">Guardar</button>
+            <button onclick="closeConfigModal()" style="background: #f44336; color: white;">Cancelar</button>
+        </div>
+    </div>
+
+    <script>
+        let gameData = {};
+        let currentParticipant = 1;
+        let currentLetter = 'A';
+        let participantTimers = {}; // Timer individualizado por participante
+        let participantCurrentLetters = {}; // Letra actual individualizada por participante
+        let defaultTimerMilliseconds = 60000; // Timer por defecto (60 segundos = 60000ms)
+        let timerInterval = null;
+        let isTimerRunning = false;
+        let letterStates = {};
+        let roundStartLetter = 'A'; // Letra donde empezó la ronda actual
+        let showAnswers = false; // Estado de mostrar/ocultar respuestas
+
+        const alphabet = 'ABCDEFGHIJKLMNÑOPQRSTUVWXYZ'.split('');
+
+        function getCurrentParticipantTimer() {
+            if (!participantTimers[currentParticipant]) {
+                participantTimers[currentParticipant] = defaultTimerMilliseconds;
+            }
+            return participantTimers[currentParticipant];
+        }
+
+        function setCurrentParticipantTimer(milliseconds) {
+            participantTimers[currentParticipant] = milliseconds;
+        }
+
+        function getCurrentParticipantLetter() {
+            if (!participantCurrentLetters[currentParticipant]) {
+                participantCurrentLetters[currentParticipant] = 'A';
+            }
+            return participantCurrentLetters[currentParticipant];
+        }
+
+        function setCurrentParticipantLetter(letter) {
+            participantCurrentLetters[currentParticipant] = letter;
+            currentLetter = letter; // Mantener sincronizado con la variable global
+        }
+
+        function initializeGame() {
+            createRosco();
+            updateDisplay();
+            loadGameState();
+            syncWithLocalStorage();
+        }
+
+        function createRosco() {
+            const rosco = document.getElementById('rosco');
+            rosco.innerHTML = '';
+            
+            alphabet.forEach((letter, index) => {
+                const letterDiv = document.createElement('div');
+                letterDiv.className = 'letter unplayed';
+                letterDiv.textContent = letter;
+                letterDiv.id = `letter-${letter}`;
+                letterDiv.onclick = () => selectLetter(letter);
+                
+                const angle = (index * 360 / 27) - 90;
+                const radius = 220;
+                const x = Math.cos(angle * Math.PI / 180) * radius + 255;
+                const y = Math.sin(angle * Math.PI / 180) * radius + 255;
+                
+                letterDiv.style.left = x + 'px';
+                letterDiv.style.top = y + 'px';
+                
+                rosco.appendChild(letterDiv);
+            });
+        }
+
+        function selectLetter(letter) {
+            // Si la letra ya tiene un estado y no es la actual, preguntar si quiere limpiarla
+            const key = `${currentParticipant}-${letter}`;
+            const currentState = letterStates[key];
+            
+            if (currentState && letter !== currentLetter) {
+                const stateNames = {
+                    'correct': 'CORRECTA (verde)',
+                    'error': 'ERROR (roja)',
+                    'pass': 'PASAPALABRA (amarilla)'
+                };
+                
+                if (confirm(`La letra ${letter} está marcada como ${stateNames[currentState]}. ¿Quieres limpiarla y volver a ponerla en gris?`)) {
+                    delete letterStates[key];
+                    updateDisplay();
+                    saveGameState();
+                    updateGameStatus(`Letra ${letter} limpiada`);
+                }
+            }
+            
+            // Siempre cambiar a la letra seleccionada
+            setCurrentParticipantLetter(letter);
+            updateDisplay();
+            saveGameState();
+        }
+
+        function updateDisplay() {
+            document.getElementById('currentLetterDisplay').textContent = currentLetter;
+            document.getElementById('participantNumber').textContent = `Participante ${currentParticipant}`;
+            
+            if (gameData[currentParticipant]) {
+                document.getElementById('participantName').textContent = gameData[currentParticipant].participante;
+                // No actualizar pregunta aquí, se maneja en updateAnswerDisplay
+            }
+            
+            updateRoscoDisplay();
+            updateTimerDisplay();
+            updateAnswerDisplay();
+        }
+
+        function updateRoscoDisplay() {
+            alphabet.forEach(letter => {
+                const letterDiv = document.getElementById(`letter-${letter}`);
+                const key = `${currentParticipant}-${letter}`;
+                const state = letterStates[key] || 'unplayed';
+                
+                letterDiv.className = `letter ${state}`;
+                if (letter === currentLetter) {
+                    letterDiv.classList.add('current');
+                }
+            });
+        }
+
+        function updateTimerDisplay() {
+            const display = document.getElementById('timerDisplay');
+            const currentTimer = getCurrentParticipantTimer();
+            const seconds = Math.floor(currentTimer / 1000);
+            const milliseconds = currentTimer % 1000;
+            
+            // Mostrar segundos.milésimas en el control
+            display.textContent = `${seconds}.${milliseconds.toString().padStart(3, '0')}`;
+            
+            display.className = 'timer-display';
+            if (seconds <= 10) {
+                display.classList.add('danger');
+            } else if (seconds <= 30) {
+                display.classList.add('warning');
+            }
+        }
+
+        function startTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+            isTimerRunning = true;
+            
+            timerInterval = setInterval(() => {
+                let currentTimer = getCurrentParticipantTimer();
+                if (currentTimer > 0) {
+                    setCurrentParticipantTimer(currentTimer - 10); // Decrementar cada 10ms para precisión
+                    updateTimerDisplay();
+                    saveGameState();
+                } else {
+                    pauseTimer();
+                    alert('¡Tiempo agotado!');
+                }
+            }, 10); // Actualizar cada 10 milésimas
+            
+            updateGameStatus('Timer en funcionamiento');
+        }
+
+        function pauseTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+            isTimerRunning = false;
+            updateGameStatus('Timer pausado');
+            saveGameState();
+        }
+
+        function resumeTimer() {
+            if (!isTimerRunning && getCurrentParticipantTimer() > 0) {
+                startTimer();
+            }
+        }
+
+        function setLetterState(state) {
+            const key = `${currentParticipant}-${currentLetter}`;
+            letterStates[key] = state;
+            
+            // Pausar automáticamente el timer cuando se marca error o pasapalabra
+            if (state === 'error' || state === 'pass') {
+                pauseTimer();
+            }
+            
+            // Para cualquier estado, usar la misma lógica de navegación
+            if (state === 'pass') {
+                moveToNextUnplayedLetter();
+            } else {
+                moveToNextLetter();
+            }
+            
+            updateDisplay();
+            saveGameState();
+        }
+
+        function moveToNextLetter() {
+            const currentIndex = alphabet.indexOf(currentLetter);
+            
+            // Si llegamos a Z y marcamos correcto/error, iniciar nueva ronda
+            if (currentIndex === 26) { // Era Z
+                setTimeout(() => {
+                    startNewRound();
+                }, 500); // Pequeña pausa para que se vea el cambio
+                return;
+            }
+            
+            // Buscar la siguiente letra disponible (no correct ni error)
+            for (let i = 1; i <= 27; i++) {
+                const nextIndex = (currentIndex + i) % 27;
+                const nextLetter = alphabet[nextIndex];
+                
+                if (isLetterAvailable(nextLetter)) {
+                    // Verificar si completamos una vuelta
+                    if (nextLetter === roundStartLetter && hasPassLetters()) {
+                        // Completamos una vuelta, convertir amarillas a grises
+                        convertPassToUnplayed();
+                        roundStartLetter = nextLetter; // Nueva ronda empieza aquí
+                        updateGameStatus('Vuelta completada - Amarillas convertidas a grises');
+                    }
+                    
+                    setCurrentParticipantLetter(nextLetter);
+                    return;
+                }
+                
+                // Si hemos dado la vuelta completa y no encontramos nada disponible
+                if (i === 27) {
+                    // Todas las letras están finalizadas, iniciar nueva ronda
+                    setTimeout(() => {
+                        startNewRound();
+                    }, 500);
+                    return;
+                }
+            }
+        }
+
+        function moveToNextUnplayedLetter() {
+            // Usar la misma lógica que moveToNextLetter
+            moveToNextLetter();
+        }
+
+        function findSmartNextLetterForParticipant(participantId) {
+            // 1. Primero verificar si tiene letras amarillas (pass) - prioridad
+            for (let letter of alphabet) {
+                const key = `${participantId}-${letter}`;
+                const state = letterStates[key];
+                if (state === 'pass') {
+                    return letter;
+                }
+            }
+            
+            // 2. Si no tiene amarillas, verificar si hay letras grises globalmente
+            if (hasAnyParticipantUnplayedLetters()) {
+                // Buscar su primera letra gris
+                for (let letter of alphabet) {
+                    const key = `${participantId}-${letter}`;
+                    const state = letterStates[key];
+                    if (!state || state === 'unplayed') {
+                        return letter;
+                    }
+                }
+            }
+            
+            // 3. Si todos completaron primera vuelta, buscar la primera letra gris global
+            const globalFirstGrey = findGlobalFirstAvailableLetter();
+            return globalFirstGrey;
+        }
+
+        function changeParticipant(direction) {
+            const participantKeys = Object.keys(gameData).map(Number).sort((a, b) => a - b);
+            if (participantKeys.length === 0) return;
+            
+            // Pausar timer del participante actual
+            if (isTimerRunning) {
+                pauseTimer();
+            }
+            
+            const currentIndex = participantKeys.indexOf(currentParticipant);
+            let newIndex;
+            
+            if (direction === 1) {
+                newIndex = (currentIndex + 1) % participantKeys.length;
+            } else {
+                newIndex = currentIndex - 1 < 0 ? participantKeys.length - 1 : currentIndex - 1;
+            }
+            
+            const newParticipant = participantKeys[newIndex];
+            
+            // Inicializar timer para nuevo participante si no existe
+            if (!participantTimers[newParticipant]) {
+                participantTimers[newParticipant] = defaultTimerMilliseconds;
+            }
+            
+            // Cambiar al nuevo participante
+            currentParticipant = newParticipant;
+            
+            // Lógica inteligente para encontrar la siguiente letra
+            if (participantCurrentLetters[currentParticipant]) {
+                // Ya tiene una letra guardada, usarla
+                currentLetter = participantCurrentLetters[currentParticipant];
+            } else {
+                // Primera vez para este participante, usar lógica inteligente
+                const smartNextLetter = findSmartNextLetterForParticipant(currentParticipant);
+                setCurrentParticipantLetter(smartNextLetter);
+            }
+            
+            roundStartLetter = currentLetter; // Resetear tracking de ronda para nuevo participante
+            
+            updateDisplay();
+            saveGameState();
+        }
+
+        function newRound() {
+            alphabet.forEach(letter => {
+                const key = `${currentParticipant}-${letter}`;
+                if (letterStates[key] === 'pass') {
+                    letterStates[key] = 'unplayed';
+                }
+            });
+            
+            setCurrentParticipantLetter('A');
+            updateDisplay();
+            saveGameState();
+            updateGameStatus('Nueva ronda iniciada');
+        }
+        
+        function startNewRound() {
+            // Convertir todas las amarillas (pass) a grises (unplayed)
+            convertPassToUnplayed();
+            
+            // Encontrar la primera letra disponible (no correct ni error)
+            const firstAvailable = findFirstAvailableLetter();
+            setCurrentParticipantLetter(firstAvailable);
+            roundStartLetter = firstAvailable; // Marcar inicio de nueva ronda
+            updateDisplay();
+            saveGameState();
+            updateGameStatus('Nueva ronda iniciada automáticamente');
+        }
+        
+        function findFirstAvailableLetter() {
+            for (let letter of alphabet) {
+                const key = `${currentParticipant}-${letter}`;
+                const state = letterStates[key];
+                if (!state || state === 'unplayed' || state === 'pass') {
+                    return letter;
+                }
+            }
+            return 'A'; // Fallback
+        }
+
+        function findNextAvailableLetterForParticipant(participantId) {
+            // Primero buscar desde la letra actual hacia adelante
+            const currentIndex = alphabet.indexOf(currentLetter);
+            
+            // Buscar desde la siguiente letra
+            for (let i = 1; i < alphabet.length; i++) {
+                const nextIndex = (currentIndex + i) % alphabet.length;
+                const nextLetter = alphabet[nextIndex];
+                const key = `${participantId}-${nextLetter}`;
+                const state = letterStates[key];
+                
+                if (!state || state === 'unplayed' || state === 'pass') {
+                    return nextLetter;
+                }
+            }
+            
+            // Si no encontramos ninguna, buscar desde el principio
+            for (let letter of alphabet) {
+                const key = `${participantId}-${letter}`;
+                const state = letterStates[key];
+                if (!state || state === 'unplayed' || state === 'pass') {
+                    return letter;
+                }
+            }
+            
+            return 'A'; // Fallback
+        }
+
+        function findFirstAvailableLetterForParticipant(participantId) {
+            // Buscar la primera letra disponible desde el principio del alfabeto
+            for (let letter of alphabet) {
+                const key = `${participantId}-${letter}`;
+                const state = letterStates[key];
+                if (!state || state === 'unplayed' || state === 'pass') {
+                    return letter;
+                }
+            }
+            return 'A'; // Fallback
+        }
+
+        function getAllActiveParticipants() {
+            return Object.keys(gameData).map(Number).sort((a, b) => a - b);
+        }
+
+        function hasAnyParticipantPassLetters() {
+            const participants = getAllActiveParticipants();
+            for (let participantId of participants) {
+                for (let letter of alphabet) {
+                    const key = `${participantId}-${letter}`;
+                    const state = letterStates[key];
+                    if (state === 'pass') {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        function hasAnyParticipantUnplayedLetters() {
+            const participants = getAllActiveParticipants();
+            for (let participantId of participants) {
+                for (let letter of alphabet) {
+                    const key = `${participantId}-${letter}`;
+                    const state = letterStates[key];
+                    if (!state || state === 'unplayed') {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        function findGlobalFirstAvailableLetter() {
+            // Buscar la primera letra que esté disponible (gris) para cualquier participante
+            for (let letter of alphabet) {
+                const participants = getAllActiveParticipants();
+                for (let participantId of participants) {
+                    const key = `${participantId}-${letter}`;
+                    const state = letterStates[key];
+                    if (!state || state === 'unplayed') {
+                        return letter;
+                    }
+                }
+            }
+            return 'A'; // Fallback
+        }
+        
+        function hasAvailableLetters() {
+            for (let letter of alphabet) {
+                const key = `${currentParticipant}-${letter}`;
+                const state = letterStates[key];
+                if (!state || state === 'unplayed' || state === 'pass') {
+                    return true;
+                }
+            }
+            return false;
+        }
+        
+        function isLetterAvailable(letter) {
+            const key = `${currentParticipant}-${letter}`;
+            const state = letterStates[key];
+            return !state || state === 'unplayed' || state === 'pass';
+        }
+        
+        function hasPassLetters() {
+            for (let letter of alphabet) {
+                const key = `${currentParticipant}-${letter}`;
+                const state = letterStates[key];
+                if (state === 'pass') {
+                    return true;
+                }
+            }
+            return false;
+        }
+        
+        function convertPassToUnplayed() {
+            alphabet.forEach(letter => {
+                const key = `${currentParticipant}-${letter}`;
+                if (letterStates[key] === 'pass') {
+                    letterStates[key] = 'unplayed';
+                }
+            });
+        }
+
+        function resetRosco() {
+            if (confirm('¿Estás seguro de que quieres limpiar completamente el rosco del participante actual?')) {
+                alphabet.forEach(letter => {
+                    const key = `${currentParticipant}-${letter}`;
+                    delete letterStates[key];
+                });
+                
+                setCurrentParticipantLetter('A');
+                roundStartLetter = 'A'; // Reiniciar tracking de ronda
+                pauseTimer();
+                updateDisplay();
+                saveGameState();
+                updateGameStatus('Rosco limpiado');
+            }
+        }
+        
+        function clearCurrentLetter() {
+            const key = `${currentParticipant}-${currentLetter}`;
+            const currentState = letterStates[key];
+            
+            if (currentState) {
+                const stateNames = {
+                    'correct': 'CORRECTA (verde)',
+                    'error': 'ERROR (roja)',
+                    'pass': 'PASAPALABRA (amarilla)'
+                };
+                
+                if (confirm(`¿Estás seguro de que quieres limpiar la letra ${currentLetter} que está marcada como ${stateNames[currentState]}?`)) {
+                    delete letterStates[key];
+                    updateDisplay();
+                    saveGameState();
+                    updateGameStatus(`Letra ${currentLetter} limpiada`);
+                }
+            } else {
+                alert(`La letra ${currentLetter} ya está limpia (gris).`);
+            }
+        }
+
+        function updateGameStatus(status) {
+            document.getElementById('gameStatus').textContent = status;
+        }
+
+        function toggleAnswers() {
+            showAnswers = !showAnswers;
+            updateAnswerDisplay();
+            saveGameState();
+        }
+
+        function updateAnswerDisplay() {
+            const answerToggle = document.getElementById('answerToggle');
+            const answerText = document.getElementById('answerText');
+            const questionText = document.getElementById('questionText');
+            
+            if (showAnswers) {
+                answerToggle.textContent = '👁️ OCULTAR PREGUNTA Y RESPUESTA';
+                answerToggle.classList.remove('hidden');
+                answerText.classList.remove('hidden');
+                
+                // Mostrar pregunta y respuesta reales
+                if (gameData[currentParticipant]) {
+                    const question = gameData[currentParticipant][currentLetter] || 'Pregunta no disponible';
+                    const answerKey = `${currentLetter}_respuesta`;
+                    const answer = gameData[currentParticipant][answerKey] || 'Respuesta no disponible';
+                    
+                    questionText.textContent = question;
+                    answerText.textContent = answer;
+                }
+            } else {
+                answerToggle.textContent = '🔍 MOSTRAR PREGUNTA Y RESPUESTA';
+                answerToggle.classList.add('hidden');
+                answerText.classList.add('hidden');
+                
+                // Ocultar pregunta y respuesta con asteriscos
+                questionText.textContent = '***********************************************';
+                answerText.textContent = '***************';
+            }
+        }
+
+        function saveGameState() {
+            const gameState = {
+                currentParticipant,
+                currentLetter,
+                participantTimers,
+                participantCurrentLetters,
+                defaultTimerMilliseconds,
+                isTimerRunning,
+                letterStates,
+                gameData,
+                roundStartLetter,
+                showAnswers
+            };
+            
+            localStorage.setItem('pasapalabraState', JSON.stringify(gameState));
+        }
+
+        function loadGameState() {
+            const saved = localStorage.getItem('pasapalabraState');
+            if (saved) {
+                const state = JSON.parse(saved);
+                currentParticipant = state.currentParticipant || 1;
+                currentLetter = state.currentLetter || 'A';
+                
+                // Cargar timers individuales
+                participantTimers = state.participantTimers || {};
+                // Cargar letras actuales individuales
+                participantCurrentLetters = state.participantCurrentLetters || {};
+                defaultTimerMilliseconds = state.defaultTimerMilliseconds || 60000;
+                
+                // Compatibilidad con versión anterior (timerSeconds/timerMilliseconds global)
+                if (state.timerMilliseconds && !state.participantTimers) {
+                    // Si existe un timer global, usarlo para el participante actual
+                    participantTimers[currentParticipant] = state.timerMilliseconds;
+                } else if (state.timerSeconds && !state.participantTimers) {
+                    participantTimers[currentParticipant] = state.timerSeconds * 1000;
+                }
+                
+                // Si no hay letras guardadas para el participante actual, usar la currentLetter global
+                if (!participantCurrentLetters[currentParticipant]) {
+                    participantCurrentLetters[currentParticipant] = currentLetter;
+                }
+                
+                isTimerRunning = state.isTimerRunning || false;
+                letterStates = state.letterStates || {};
+                gameData = state.gameData || {};
+                roundStartLetter = state.roundStartLetter || 'A';
+                showAnswers = state.showAnswers || false;
+            }
+        }
+
+        function syncWithLocalStorage() {
+            setInterval(saveGameState, 1000);
+        }
+
+        function showConfigModal() {
+            document.getElementById('configModal').style.display = 'block';
+            document.getElementById('timeInput').value = Math.floor(getCurrentParticipantTimer() / 1000);
+        }
+
+        function closeConfigModal() {
+            document.getElementById('configModal').style.display = 'none';
+        }
+
+        function saveTimeConfig() {
+            const newTimeSeconds = parseInt(document.getElementById('timeInput').value);
+            if (newTimeSeconds >= 10 && newTimeSeconds <= 300) {
+                setCurrentParticipantTimer(newTimeSeconds * 1000); // Convertir a milésimas
+                updateTimerDisplay();
+                saveGameState();
+                closeConfigModal();
+            }
+        }
+
+        document.getElementById('prevParticipant').onclick = () => changeParticipant(-1);
+        document.getElementById('nextParticipant').onclick = () => changeParticipant(1);
+        document.getElementById('correctBtn').onclick = () => setLetterState('correct');
+        document.getElementById('passBtn').onclick = () => setLetterState('pass');
+        document.getElementById('errorBtn').onclick = () => setLetterState('error');
+        document.getElementById('pauseBtn').onclick = pauseTimer;
+        document.getElementById('resumeBtn').onclick = resumeTimer;
+        document.getElementById('configBtn').onclick = showConfigModal;
+        document.getElementById('resetBtn').onclick = resetRosco;
+        document.getElementById('clearLetterBtn').onclick = clearCurrentLetter;
+        document.getElementById('answerToggle').onclick = toggleAnswers;
+
+        document.getElementById('fileInput').onchange = function(event) {
+            const files = Array.from(event.target.files);
+            if (files.length === 0) return;
+            
+            let loadedCount = 0;
+            const totalFiles = files.length;
+            const newGameData = {};
+            const loadedFileNames = [];
+
+            files.forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const jsonData = JSON.parse(e.target.result);
+                        
+                        // Fusionar los datos de cada archivo
+                        Object.keys(jsonData).forEach(key => {
+                            // Buscar el próximo número de participante disponible
+                            let participantNumber = Object.keys(newGameData).length + 1;
+                            while (newGameData[participantNumber]) {
+                                participantNumber++;
+                            }
+                            newGameData[participantNumber] = jsonData[key];
+                        });
+                        
+                        loadedFileNames.push(file.name);
+                        loadedCount++;
+                        
+                        // Cuando todos los archivos estén cargados
+                        if (loadedCount === totalFiles) {
+                            gameData = newGameData;
+                            updateDisplay();
+                            saveGameState();
+                            updateGameStatus(`${totalFiles} archivo(s) cargado(s) correctamente`);
+                            
+                            // Mostrar archivos cargados
+                            document.getElementById('loadedFiles').innerHTML = 
+                                `<strong>Archivos cargados:</strong> ${loadedFileNames.join(', ')}`;
+                        }
+                        
+                    } catch (error) {
+                        alert(`Error al cargar el archivo ${file.name}: ${error.message}`);
+                    }
+                };
+                reader.readAsText(file);
+            });
+        };
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('configModal');
+            if (event.target === modal) {
+                closeConfigModal();
+            }
+        };
+        
+        // Agregar listeners para controles de teclado
+        document.addEventListener('keydown', function(event) {
+            // Evitar que los atajos funcionen si estamos escribiendo en un input
+            if (event.target.tagName === 'INPUT') {
+                return;
+            }
+            
+            switch(event.key) {
+                case 'Enter':
+                    event.preventDefault();
+                    toggleTimer();
+                    break;
+                case '1':
+                    event.preventDefault();
+                    setLetterState('correct');
+                    break;
+                case '2':
+                    event.preventDefault();
+                    setLetterState('pass');
+                    break;
+                case '3':
+                    event.preventDefault();
+                    setLetterState('error');
+                    break;
+            }
+        });
+        
+        function toggleTimer() {
+            if (isTimerRunning) {
+                pauseTimer();
+            } else {
+                resumeTimer();
+            }
+        }
+
+        initializeGame();
+    </script>
+</body>
+</html>
